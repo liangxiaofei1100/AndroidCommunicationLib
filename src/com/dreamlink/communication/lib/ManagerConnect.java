@@ -20,12 +20,12 @@ public class ManagerConnect {
 	private Communication mCommunication;
 	private static ManagerConnect p;
 	private final String INTENT_STRING = "com.dreamlink.communication.ComService";
-	private HashMap<NotifyInterface, OnCommunicationListenerExternal.Stub> hashMap;
+	private HashMap<OnCommunicationListener, OnCommunicationListenerExternal.Stub> hashMap;
 	private Context mContext;
-	private Vector<Connected> vector;
+	private Vector<CommunicationConnectedListener> vector;
 
 	/** the call back interface ,must be implement */
-	public interface NotifyInterface {
+	public interface OnCommunicationListener {
 		/**
 		 * Received a message from user.</br>
 		 * 
@@ -62,13 +62,13 @@ public class ManagerConnect {
 	 * this interface ,then you will know when you can use the instance of
 	 * {@link ManagerConnect},and when you should not
 	 * */
-	public interface Connected {
+	public interface CommunicationConnectedListener {
 
 		/**
 		 * notify disconnect,please don't use the instance of
 		 * {@link ManagerConnect} anymore
 		 */
-		public void onDisconnected();
+		public void onCommunicationDisconnected();
 
 		/**
 		 * notify connect can use
@@ -76,11 +76,11 @@ public class ManagerConnect {
 		 * @param managerConnect
 		 *            {@link ManagerConnect} instance,you can use
 		 * */
-		public void onConnected(ManagerConnect managerConnect);
+		public void onCommunicationConnected(ManagerConnect managerConnect);
 	}
 
 	private ManagerConnect() {
-		vector = new Vector<ManagerConnect.Connected>();
+		vector = new Vector<ManagerConnect.CommunicationConnectedListener>();
 	}
 
 	private ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -88,8 +88,8 @@ public class ManagerConnect {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			if (vector != null && vector.size() != 0) {
-				for (Connected connected : vector) {
-					connected.onDisconnected();
+				for (CommunicationConnectedListener connected : vector) {
+					connected.onCommunicationDisconnected();
 				}
 			}
 			mCommunication = null;
@@ -103,8 +103,8 @@ public class ManagerConnect {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			mCommunication = Communication.Stub.asInterface(service);
 			if (vector != null && vector.size() != 0) {
-				for (Connected connected : vector) {
-					connected.onConnected(p);
+				for (CommunicationConnectedListener connected : vector) {
+					connected.onCommunicationConnected(p);
 				}
 			}
 		}
@@ -118,7 +118,7 @@ public class ManagerConnect {
 	 * @return maybe null ,please check it
 	 */
 	public static ManagerConnect getInstance(final Context context,
-			Connected connected) {
+			CommunicationConnectedListener connected) {
 		if (p == null) {
 			p = new ManagerConnect();
 			p.mContext = context;
@@ -138,13 +138,13 @@ public class ManagerConnect {
 	 * ,please register call back listener first
 	 * 
 	 * @param i
-	 *            {@link NotifyInterface},must implements
+	 *            {@link OnCommunication},must implements
 	 * @param appid
 	 *            your application id
 	 */
-	public void register(final NotifyInterface i, final int appid) {
+	public void register(final OnCommunicationListener i, final int appid) {
 		if (hashMap == null) {
-			hashMap = new HashMap<ManagerConnect.NotifyInterface, OnCommunicationListenerExternal.Stub>();
+			hashMap = new HashMap<ManagerConnect.OnCommunicationListener, OnCommunicationListenerExternal.Stub>();
 		}
 		final OnCommunicationListenerExternal.Stub s = new OnCommunicationListenerExternal.Stub() {
 
@@ -178,9 +178,9 @@ public class ManagerConnect {
 	 * unregister call back
 	 * 
 	 * @param i
-	 *            {@link NotifyInterface}
+	 *            {@link OnCommunication}
 	 */
-	public void unregister(NotifyInterface i) {
+	public void unregister(OnCommunicationListener i) {
 		if (!hashMap.containsKey(i)) {
 			Log.e("ArbiterLiu", " This ITest interface is not  registered ");
 			return;
@@ -254,10 +254,10 @@ public class ManagerConnect {
 		}
 	};
 
-	private void rigisterConnected(Connected connected) {
+	private void rigisterConnected(CommunicationConnectedListener connected) {
 		vector.add(connected);
 		if (mCommunication != null) {
-			connected.onConnected(p);
+			connected.onCommunicationConnected(p);
 		}
 	}
 }
