@@ -1,5 +1,5 @@
-package com.dreamlink.aidl;
-import com.dreamlink.communication.lib.User;
+package com.dreamlink.communication.aidl;
+import com.dreamlink.communication.aidl.User;
 /**@hide*/
 interface OnCommunicationListenerExternal{
  	/**

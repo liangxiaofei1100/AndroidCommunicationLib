@@ -1,6 +1,8 @@
-package com.dreamlink.communication.lib;
+package com.dreamlink.communication.aidl;
 
 import java.io.Serializable;
+
+import com.dreamlink.communication.lib.SystemInfo;
 
 import android.os.Parcel;
 import android.os.Parcelable;

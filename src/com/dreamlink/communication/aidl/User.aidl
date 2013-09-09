@@ -14,5 +14,5 @@
 ** See the License for the specific language governing permissions and  
 ** limitations under the License. 
 */  
-package com.dreamlink.communication.lib;
+package com.dreamlink.communication.aidl;
 parcelable User;  

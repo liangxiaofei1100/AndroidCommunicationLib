@@ -1,7 +1,7 @@
-package com.dreamlink.aidl;
+package com.dreamlink.communication.aidl;
 
-import com.dreamlink.aidl.OnCommunicationListenerExternal;
-import com.dreamlink.communication.lib.User;
+import com.dreamlink.communication.aidl.OnCommunicationListenerExternal;
+import com.dreamlink.communication.aidl.User;
 /**@hide*/
 interface Communication{
 	/**register call back listener with your application id.

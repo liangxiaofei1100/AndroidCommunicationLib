@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
-import com.dreamlink.aidl.Communication;
-import com.dreamlink.aidl.OnCommunicationListenerExternal;
+import com.dreamlink.communication.aidl.Communication;
+import com.dreamlink.communication.aidl.OnCommunicationListenerExternal;
+import com.dreamlink.communication.aidl.User;
 
 import android.content.ComponentName;
 import android.content.Context;
