@@ -9,7 +9,7 @@ interface Communication{
 	*
 	*@param lis {@link OnCommunicationListenerExternal}
 	*/
-	void registListenr(OnCommunicationListenerExternal lis,int appid);
+	void registListener(OnCommunicationListenerExternal lis,int appid);
 	/**
 	 * send message to user
 	 * @param msg
@@ -27,7 +27,7 @@ interface Communication{
 	*
 	*@param lis {@link OnCommunicationListenerExternal}
 	*/
-	void unRegistListenr(OnCommunicationListenerExternal lis);
+	void unRegistListener(OnCommunicationListenerExternal lis);
 	User getLocalUser();
 	/**
 	 * send message to all of users
