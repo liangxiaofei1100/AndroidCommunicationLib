@@ -15,7 +15,8 @@ import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * This class is
+ * This class is used for bind communication service and communicate with it by
+ * android service.
  * 
  */
 public class CommunicationManager {
