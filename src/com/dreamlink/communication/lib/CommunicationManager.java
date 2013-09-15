@@ -118,7 +118,13 @@ public class CommunicationManager {
 				mOnConnectionChangeListener.onCommunicationDisconnected();
 			}
 			if (mOnCommunicationListener != null && mAppID != -1) {
-
+				try {
+					mCommunication.unRegistListener(mStub);
+				} catch (RemoteException e) {
+					Log.e(TAG,
+							"onServiceDisconnected() unRegistListener error "
+									+ e);
+				}
 			}
 
 			mCommunication = null;
@@ -275,6 +281,9 @@ public class CommunicationManager {
 		try {
 			mCommunication.sendMessageToAll(msg, appID);
 		} catch (RemoteException e) {
+			Log.e(TAG, "sendMessageToAll error " + e);
+			return false;
+		} catch (Exception e) {
 			Log.e(TAG, "sendMessageToAll error " + e);
 			return false;
 		}
