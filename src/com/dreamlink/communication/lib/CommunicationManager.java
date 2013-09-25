@@ -294,7 +294,7 @@ public class CommunicationManager {
 	 * @param appID
 	 *            your application id ,define in manifest meta-data
 	 * @param user
-	 *            the mesaage will send to
+	 *            the message will send to
 	 * */
 	public boolean sendMessage(byte[] msg, int appID, User user) {
 		Log.d(TAG, "sendMessage: appid = " + appID + ", user = " + user);
@@ -409,7 +409,6 @@ public class CommunicationManager {
 	public void createHost(String appName, String pakcageName, int numberLimit,
 			int app_id) {
 		try {
-			Log.e("ArbiterLiu", "createHost");
 			mCommunication
 					.createHost(appName, pakcageName, numberLimit, app_id);
 		} catch (RemoteException e) {
@@ -472,7 +471,7 @@ public class CommunicationManager {
 		}
 	};
 
-	public void sendDataAll(byte[] data, HostInfo info) {
+	public void sendDataGroupAll(byte[] data, HostInfo info) {
 		try {
 			mCommunication.sendDataAll(data, info);
 		} catch (RemoteException e) {
@@ -481,7 +480,7 @@ public class CommunicationManager {
 		}
 	};
 
-	public void sendDataSingle(byte[] data, HostInfo info, User targetUser) {
+	public void sendDataGroupSingle(byte[] data, HostInfo info, User targetUser) {
 		try {
 			mCommunication.sendDataSingle(data, info, targetUser);
 		} catch (RemoteException e) {
