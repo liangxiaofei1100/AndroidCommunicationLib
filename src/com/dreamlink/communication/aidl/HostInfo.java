@@ -8,8 +8,9 @@ import android.os.Parcelable;
 public class HostInfo implements Serializable, Parcelable {
 
 	private static final long serialVersionUID = 57468L;
-	public int hostId=-1;// 由主server来定义便于变更查找，可以快速定位
+	public int hostId = -1;// 由主server来定义便于变更查找，可以快速定位
 	public int ownerID;
+	public String ownerName;
 	public int personLimit;
 	public String packageName;
 	public String appName;
@@ -27,6 +28,7 @@ public class HostInfo implements Serializable, Parcelable {
 		// TODO Auto-generated method stub
 		dest.writeInt(hostId);
 		dest.writeInt(ownerID);
+		dest.writeString(ownerName);
 		dest.writeInt(personLimit);
 		dest.writeString(packageName);
 		dest.writeString(appName);
@@ -38,6 +40,7 @@ public class HostInfo implements Serializable, Parcelable {
 	public void readFromParcel(Parcel source) {
 		hostId = source.readInt();
 		ownerID = source.readInt();
+		ownerName = source.readString();
 		personLimit = source.readInt();
 		packageName = source.readString();
 		appName = source.readString();
