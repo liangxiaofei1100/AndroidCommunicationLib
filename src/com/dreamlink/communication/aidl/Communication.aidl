@@ -68,6 +68,7 @@ interface Communication{
  
  
  	void sendDataSingle(in byte[] data,in HostInfo info, in User targetUser);
+ 	List<HostInfo> getJoinedHostInfo(int appId);
  /***/
 	
 }

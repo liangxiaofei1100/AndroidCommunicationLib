@@ -68,30 +68,27 @@ public class CommunicationManager {
 		@Override
 		public void startGroupBusiness(HostInfo hostInfo)
 				throws RemoteException {
-			// TODO Auto-generated method stub
 			platformCallback.startGroupBusiness(hostInfo);
 		}
 
 		@Override
 		public void receiverMessage(byte[] data, User sendUser,
 				boolean allFlag, HostInfo info) throws RemoteException {
-			// TODO Auto-generated method stub
 			platformCallback.receiverMessage(data, sendUser, allFlag, info);
 		}
 
 		@Override
 		public void joinGroupResult(HostInfo hostInfo, boolean flag)
 				throws RemoteException {
-			// TODO Auto-generated method stub
 			platformCallback.joinGroupResult(hostInfo, flag);
 		}
 
 		@Override
 		public void hostInfoChange(byte[] data) throws RemoteException {
-			// TODO Auto-generated method stub
+			@SuppressWarnings("unchecked")
 			ConcurrentHashMap<Integer, HostInfo> hostList = (ConcurrentHashMap<Integer, HostInfo>) ArrayUtil
 					.byteArrayToObject(data);
-			List< HostInfo> tem = new ArrayList<HostInfo>();
+			List<HostInfo> tem = new ArrayList<HostInfo>();
 			for (java.util.Map.Entry<Integer, HostInfo> entry : hostList
 					.entrySet()) {
 				HostInfo hostInfo = entry.getValue();
@@ -105,20 +102,18 @@ public class CommunicationManager {
 
 		@Override
 		public void hostHasCreated(HostInfo hostInfo) throws RemoteException {
-			// TODO Auto-generated method stub
 			platformCallback.hostHasCreated(hostInfo);
 		}
 
 		@Override
 		public void hasExitGroup(int hostId) throws RemoteException {
-			// TODO Auto-generated method stub
 			platformCallback.hasExitGroup(hostId);
 		}
 
 		@Override
 		public void groupMemberUpdate(int hostId, byte[] data)
 				throws RemoteException {
-			// TODO Auto-generated method stub
+			@SuppressWarnings("unchecked")
 			ArrayList<User> userIdList = (ArrayList<User>) ArrayUtil
 					.byteArrayToObject(data);
 			if (userIdList != null)
@@ -389,7 +384,6 @@ public class CommunicationManager {
 			try {
 				mCommunication.regitserPlatformCallback(platStub, appId);
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -400,19 +394,30 @@ public class CommunicationManager {
 			try {
 				mCommunication.unregitserPlatformCallback(appId);
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
 
+	/**
+	 * @param pakcageName
+	 *            your package name
+	 * @param appName
+	 *            if your application just create one kind of host,please keep
+	 *            this value only,else use this to differentiate  host
+	 * @param numberLimit
+	 *            your host allow how many person to join in.if 0 mean no
+	 *            limited;1 mean not allow person join;else allow numberLimit-1
+	 *            join
+	 * @param app_id
+	 *            your app_id
+	 * */
 	public void createHost(String appName, String pakcageName, int numberLimit,
 			int app_id) {
 		try {
 			mCommunication
 					.createHost(appName, pakcageName, numberLimit, app_id);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	};
@@ -421,7 +426,6 @@ public class CommunicationManager {
 		try {
 			mCommunication.getAllHost(appID);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	};
@@ -430,7 +434,6 @@ public class CommunicationManager {
 		try {
 			mCommunication.joinGroup(hostInfo);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	};
@@ -439,7 +442,6 @@ public class CommunicationManager {
 		try {
 			mCommunication.exitGroup(hostInfo);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	};
@@ -448,7 +450,6 @@ public class CommunicationManager {
 		try {
 			mCommunication.removeGroupMember(hostId, userId);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	};
@@ -457,7 +458,6 @@ public class CommunicationManager {
 		try {
 			mCommunication.getGroupUser(hostInfo);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	};
@@ -466,7 +466,6 @@ public class CommunicationManager {
 		try {
 			mCommunication.startGroupBusiness(hostId);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	};
@@ -475,7 +474,6 @@ public class CommunicationManager {
 		try {
 			mCommunication.sendDataAll(data, info);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	};
@@ -484,9 +482,18 @@ public class CommunicationManager {
 		try {
 			mCommunication.sendDataSingle(data, info, targetUser);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	};
+
+	public List<HostInfo> getJoinedHostInfo() {
+		try {
+			return mCommunication.getJoinedHostInfo(mAppID);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 }
