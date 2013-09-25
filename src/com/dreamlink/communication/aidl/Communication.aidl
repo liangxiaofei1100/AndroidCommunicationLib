@@ -2,6 +2,8 @@ package com.dreamlink.communication.aidl;
 
 import com.dreamlink.communication.aidl.OnCommunicationListenerExternal;
 import com.dreamlink.communication.aidl.User;
+import com.dreamlink.communication.aidl.HostInfo;
+import com.dreamlink.communication.aidl.PlatformManagerCallback;
 /**@hide*/
 interface Communication{
 	/**register call back listener with your application id.
@@ -27,7 +29,7 @@ interface Communication{
 	*
 	*@param lis {@link OnCommunicationListenerExternal}
 	*/
-	void unRegistListener(OnCommunicationListenerExternal lis);
+	void unRegistListener(int appId);
 	User getLocalUser();
 	/**
 	 * send message to all of users
@@ -37,4 +39,35 @@ interface Communication{
 	 *            your application id ,define in manifest meta-data
 	 * */
 	void sendMessageToAll(in byte[] msg,int appID);
+	
+	/**platform aidl interface */
+	
+	void regitserPlatformCallback(PlatformManagerCallback callback,int apId);
+	void unregitserPlatformCallback(int apId);
+	 void createHost(String appName, String pakcageName, int numberLimit,
+			int app_id);
+
+
+	 void getAllHost(int appID);
+ 
+	 void joinGroup(in HostInfo hostInfo);
+ 
+ 	 void exitGroup(in HostInfo hostInfo);
+ 
+ 
+	 void removeGroupMember(int hostId, int userId);
+ 
+ 	
+	 void getGroupUser(in HostInfo hostInfo);
+  
+ 
+	 void startGroupBusiness(int hostId);
+ 
+ 
+ 	void sendDataAll(in byte[] data,in HostInfo info);
+ 
+ 
+ 	void sendDataSingle(in byte[] data,in HostInfo info, in User targetUser);
+ /***/
+	
 }

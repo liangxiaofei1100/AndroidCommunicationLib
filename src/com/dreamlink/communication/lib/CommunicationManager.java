@@ -1,15 +1,21 @@
 package com.dreamlink.communication.lib;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.dreamlink.communication.aidl.Communication;
+import com.dreamlink.communication.aidl.HostInfo;
 import com.dreamlink.communication.aidl.OnCommunicationListenerExternal;
+import com.dreamlink.communication.aidl.PlatformManagerCallback;
 import com.dreamlink.communication.aidl.User;
+import com.dreamlink.communication.lib.util.ArrayUtil;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.DropBoxManager.Entry;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -22,12 +28,14 @@ import android.util.Log;
 public class CommunicationManager {
 	private static final String TAG = "CommunicationManager";
 	private Communication mCommunication;
+	private PlatformCallback platformCallback;
 	/** Intent to start communication service */
 	private final String ACTION_COMMUNICATION_SERVICE = "com.dreamlink.communication.ComService";
 	private Context mContext;
 	private OnConnectionChangeListener mOnConnectionChangeListener;
 	private OnCommunicationListener mOnCommunicationListener;
 	private int mAppID = -1;
+	private boolean platformRegisted = false;
 	private OnCommunicationListenerExternal.Stub mStub = new OnCommunicationListenerExternal.Stub() {
 		@Override
 		public void onUserDisconnected(User user) throws RemoteException {
@@ -53,6 +61,70 @@ public class CommunicationManager {
 				mOnCommunicationListener.onReceiveMessage(msg, sendUser);
 			}
 		}
+	};
+
+	private PlatformManagerCallback.Stub platStub = new PlatformManagerCallback.Stub() {
+
+		@Override
+		public void startGroupBusiness(HostInfo hostInfo)
+				throws RemoteException {
+			// TODO Auto-generated method stub
+			platformCallback.startGroupBusiness(hostInfo);
+		}
+
+		@Override
+		public void receiverMessage(byte[] data, User sendUser,
+				boolean allFlag, HostInfo info) throws RemoteException {
+			// TODO Auto-generated method stub
+			platformCallback.receiverMessage(data, sendUser, allFlag, info);
+		}
+
+		@Override
+		public void joinGroupResult(HostInfo hostInfo, boolean flag)
+				throws RemoteException {
+			// TODO Auto-generated method stub
+			platformCallback.joinGroupResult(hostInfo, flag);
+		}
+
+		@Override
+		public void hostInfoChange(byte[] data) throws RemoteException {
+			// TODO Auto-generated method stub
+			ConcurrentHashMap<Integer, HostInfo> hostList = (ConcurrentHashMap<Integer, HostInfo>) ArrayUtil
+					.byteArrayToObject(data);
+			List< HostInfo> tem = new ArrayList<HostInfo>();
+			for (java.util.Map.Entry<Integer, HostInfo> entry : hostList
+					.entrySet()) {
+				HostInfo hostInfo = entry.getValue();
+				if (hostInfo.app_id == mAppID) {
+					tem.add(hostInfo);
+				}
+			}
+			if (hostList != null)
+				platformCallback.hostInfoChange(tem);
+		}
+
+		@Override
+		public void hostHasCreated(HostInfo hostInfo) throws RemoteException {
+			// TODO Auto-generated method stub
+			platformCallback.hostHasCreated(hostInfo);
+		}
+
+		@Override
+		public void hasExitGroup(int hostId) throws RemoteException {
+			// TODO Auto-generated method stub
+			platformCallback.hasExitGroup(hostId);
+		}
+
+		@Override
+		public void groupMemberUpdate(int hostId, byte[] data)
+				throws RemoteException {
+			// TODO Auto-generated method stub
+			ArrayList<User> userIdList = (ArrayList<User>) ArrayUtil
+					.byteArrayToObject(data);
+			if (userIdList != null)
+				platformCallback.groupMemberUpdate(hostId, userIdList);
+		}
+
 	};
 
 	/** the call back interface ,must be implement */
@@ -85,7 +157,24 @@ public class CommunicationManager {
 		 *            the disconnected user
 		 */
 		void onUserDisconnected(User user);
+	}
 
+	public interface PlatformCallback {
+
+		void hostHasCreated(HostInfo hostInfo);
+
+		void joinGroupResult(HostInfo hostInfo, boolean flag);
+
+		void groupMemberUpdate(int hostId, ArrayList<User> userList);
+
+		void hostInfoChange(List<HostInfo> hostList);
+
+		void hasExitGroup(int hostId);
+
+		void receiverMessage(byte[] data, User sendUser, boolean allFlag,
+				HostInfo info);
+
+		void startGroupBusiness(HostInfo hostInfo);
 	}
 
 	/**
@@ -119,7 +208,7 @@ public class CommunicationManager {
 			}
 			if (mOnCommunicationListener != null && mAppID != -1) {
 				try {
-					mCommunication.unRegistListener(mStub);
+					mCommunication.unRegistListener(mAppID);
 				} catch (RemoteException e) {
 					Log.e(TAG,
 							"onServiceDisconnected() unRegistListener error "
@@ -161,7 +250,7 @@ public class CommunicationManager {
 	public boolean connectCommunicatonService(
 			OnConnectionChangeListener connectionChangeListener,
 			OnCommunicationListener communicationListener, int appID) {
-		Log.d(TAG, "connectCommunicatonService appID　= " + appID);
+		Log.d(TAG, "connectCommunicatonService appID銆� " + appID);
 		mOnConnectionChangeListener = connectionChangeListener;
 		mOnCommunicationListener = communicationListener;
 		mAppID = appID;
@@ -179,7 +268,7 @@ public class CommunicationManager {
 	public void disconnectCommunicationService() {
 		Log.d(TAG, "disconnectCommunicationService");
 		try {
-			mCommunication.unRegistListener(mStub);
+			mCommunication.unRegistListener(mAppID);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -289,4 +378,116 @@ public class CommunicationManager {
 		}
 		return true;
 	}
+
+	/* for platform manager- start */
+	/** if want use platform ,please invoke this method first */
+	public void registerPlatformCallback(PlatformCallback platformCallback,
+			int appId) {
+		if (mCommunication != null && platformCallback != null) {
+			this.platformCallback = platformCallback;
+			platformRegisted = true;
+			try {
+				mCommunication.regitserPlatformCallback(platStub, appId);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void unregitserPlatformCallback(int appId) {
+		if (platformRegisted && mCommunication != null) {
+			try {
+				mCommunication.unregitserPlatformCallback(appId);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void createHost(String appName, String pakcageName, int numberLimit,
+			int app_id) {
+		try {
+			Log.e("ArbiterLiu", "createHost");
+			mCommunication
+					.createHost(appName, pakcageName, numberLimit, app_id);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	};
+
+	public void getAllHost(int appID) {
+		try {
+			mCommunication.getAllHost(appID);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	};
+
+	public void joinGroup(HostInfo hostInfo) {
+		try {
+			mCommunication.joinGroup(hostInfo);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	};
+
+	public void exitGroup(HostInfo hostInfo) {
+		try {
+			mCommunication.exitGroup(hostInfo);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	};
+
+	public void removeGroupMember(int hostId, int userId) {
+		try {
+			mCommunication.removeGroupMember(hostId, userId);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	};
+
+	public void getGroupUser(HostInfo hostInfo) {
+		try {
+			mCommunication.getGroupUser(hostInfo);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	};
+
+	public void startGroupBusiness(int hostId) {
+		try {
+			mCommunication.startGroupBusiness(hostId);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	};
+
+	public void sendDataAll(byte[] data, HostInfo info) {
+		try {
+			mCommunication.sendDataAll(data, info);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	};
+
+	public void sendDataSingle(byte[] data, HostInfo info, User targetUser) {
+		try {
+			mCommunication.sendDataSingle(data, info, targetUser);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	};
+
 }
