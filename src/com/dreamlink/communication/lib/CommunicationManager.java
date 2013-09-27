@@ -68,19 +68,22 @@ public class CommunicationManager {
 		@Override
 		public void startGroupBusiness(HostInfo hostInfo)
 				throws RemoteException {
-			platformCallback.startGroupBusiness(hostInfo);
+			if (platformCallback != null)
+				platformCallback.startGroupBusiness(hostInfo);
 		}
 
 		@Override
 		public void receiverMessage(byte[] data, User sendUser,
 				boolean allFlag, HostInfo info) throws RemoteException {
-			platformCallback.receiverMessage(data, sendUser, allFlag, info);
+			if (platformCallback != null)
+				platformCallback.receiverMessage(data, sendUser, allFlag, info);
 		}
 
 		@Override
 		public void joinGroupResult(HostInfo hostInfo, boolean flag)
 				throws RemoteException {
-			platformCallback.joinGroupResult(hostInfo, flag);
+			if (platformCallback != null)
+				platformCallback.joinGroupResult(hostInfo, flag);
 		}
 
 		@Override
@@ -96,18 +99,20 @@ public class CommunicationManager {
 					tem.add(hostInfo);
 				}
 			}
-			if (hostList != null)
+			if (hostList != null && platformCallback != null)
 				platformCallback.hostInfoChange(tem);
 		}
 
 		@Override
 		public void hostHasCreated(HostInfo hostInfo) throws RemoteException {
-			platformCallback.hostHasCreated(hostInfo);
+			if (platformCallback != null)
+				platformCallback.hostHasCreated(hostInfo);
 		}
 
 		@Override
 		public void hasExitGroup(int hostId) throws RemoteException {
-			platformCallback.hasExitGroup(hostId);
+			if (platformCallback != null)
+				platformCallback.hasExitGroup(hostId);
 		}
 
 		@Override
@@ -116,7 +121,7 @@ public class CommunicationManager {
 			@SuppressWarnings("unchecked")
 			ArrayList<User> userIdList = (ArrayList<User>) ArrayUtil
 					.byteArrayToObject(data);
-			if (userIdList != null)
+			if (userIdList != null && platformCallback != null)
 				platformCallback.groupMemberUpdate(hostId, userIdList);
 		}
 
@@ -390,6 +395,7 @@ public class CommunicationManager {
 	}
 
 	public void unregitserPlatformCallback(int appId) {
+		Log.e("ArbiterLiu", "unregitserPlatformCallback      " + appId);
 		if (platformRegisted && mCommunication != null) {
 			try {
 				mCommunication.unregitserPlatformCallback(appId);
@@ -404,7 +410,7 @@ public class CommunicationManager {
 	 *            your package name
 	 * @param appName
 	 *            if your application just create one kind of host,please keep
-	 *            this value only,else use this to differentiate  host
+	 *            this value only,else use this to differentiate host
 	 * @param numberLimit
 	 *            your host allow how many person to join in.if 0 mean no
 	 *            limited;1 mean not allow person join;else allow numberLimit-1
