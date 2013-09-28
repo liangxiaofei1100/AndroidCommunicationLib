@@ -2,10 +2,13 @@ package com.dreamlink.communication.lib.util;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ServiceInfo;
 import android.util.Log;
 
 public class AppUtil {
@@ -44,6 +47,27 @@ public class AppUtil {
 					.getApplicationInfo(application.getPackageName(),
 							PackageManager.GET_META_DATA);
 			appID = applicationInfo.metaData.getInt(META_DATA_APP_ID);
+		} catch (NameNotFoundException e) {
+			Log.e(TAG, "getAppID fail. " + e);
+		}
+		return appID;
+	}
+
+	/**
+	 * Get app id which set by service.
+	 * 
+	 * @param service
+	 * @return
+	 */
+	public static int getAppID(Service service) {
+		int appID = 0;
+		try {
+			ServiceInfo serviceInfo = service.getPackageManager()
+					.getServiceInfo(
+							new ComponentName(service.getPackageName(), service
+									.getClass().getName()),
+							PackageManager.GET_META_DATA);
+			appID = serviceInfo.metaData.getInt(META_DATA_APP_ID);
 		} catch (NameNotFoundException e) {
 			Log.e(TAG, "getAppID fail. " + e);
 		}
