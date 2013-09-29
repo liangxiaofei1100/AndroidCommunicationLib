@@ -213,6 +213,7 @@ public class CommunicationManager {
 					Log.e(TAG,
 							"onServiceDisconnected() unRegistListener error "
 									+ e);
+				} catch (NullPointerException e) {
 				}
 			}
 
@@ -231,6 +232,7 @@ public class CommunicationManager {
 					mCommunication.registListener(mStub, mAppID);
 				} catch (RemoteException e) {
 					Log.e(TAG, "onServiceConnected() registListener error " + e);
+				} catch (NullPointerException e) {
 				}
 			}
 		}
@@ -271,6 +273,7 @@ public class CommunicationManager {
 			mCommunication.unRegistListener(mAppID);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
 		}
 		mContext.unbindService(mServiceConnection);
 	}
@@ -307,6 +310,7 @@ public class CommunicationManager {
 		} catch (RemoteException e) {
 			Log.e(TAG, "sendMessage error " + e);
 			return false;
+		} catch (NullPointerException e) {
 		}
 		return true;
 	}
@@ -321,6 +325,7 @@ public class CommunicationManager {
 			return mCommunication.getAllUser();
 		} catch (RemoteException e) {
 			Log.e(TAG, "getAllUser error " + e);
+		} catch (NullPointerException e) {
 		}
 		return null;
 	};
@@ -339,6 +344,7 @@ public class CommunicationManager {
 			return mCommunication.getLocalUser();
 		} catch (RemoteException e) {
 			Log.e(TAG, "getLocalUser error " + e);
+		} catch (NullPointerException e) {
 		}
 		return null;
 	};
@@ -372,7 +378,7 @@ public class CommunicationManager {
 		} catch (RemoteException e) {
 			Log.e(TAG, "sendMessageToAll error " + e);
 			return false;
-		} catch (Exception e) {
+		} catch (NullPointerException e) {
 			Log.e(TAG, "sendMessageToAll error " + e);
 			return false;
 		}
@@ -390,6 +396,7 @@ public class CommunicationManager {
 				mCommunication.regitserPlatformCallback(platStub, appId);
 			} catch (RemoteException e) {
 				e.printStackTrace();
+			} catch (NullPointerException e) {
 			}
 		}
 	}
@@ -401,6 +408,7 @@ public class CommunicationManager {
 				mCommunication.unregitserPlatformCallback(appId);
 			} catch (RemoteException e) {
 				e.printStackTrace();
+			} catch (NullPointerException e) {
 			}
 		}
 	}
@@ -425,6 +433,7 @@ public class CommunicationManager {
 					.createHost(appName, pakcageName, numberLimit, app_id);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
 		}
 	};
 
@@ -433,6 +442,7 @@ public class CommunicationManager {
 			mCommunication.getAllHost(appID);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
 		}
 	};
 
@@ -441,6 +451,7 @@ public class CommunicationManager {
 			mCommunication.joinGroup(hostInfo);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
 		}
 	};
 
@@ -449,6 +460,7 @@ public class CommunicationManager {
 			mCommunication.exitGroup(hostInfo);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
 		}
 	};
 
@@ -457,6 +469,7 @@ public class CommunicationManager {
 			mCommunication.removeGroupMember(hostId, userId);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
 		}
 	};
 
@@ -465,6 +478,7 @@ public class CommunicationManager {
 			mCommunication.getGroupUser(hostInfo);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
 		}
 	};
 
@@ -473,6 +487,7 @@ public class CommunicationManager {
 			mCommunication.startGroupBusiness(hostId);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
 		}
 	};
 
@@ -481,6 +496,7 @@ public class CommunicationManager {
 			mCommunication.sendDataAll(data, info);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
 		}
 	};
 
@@ -489,6 +505,7 @@ public class CommunicationManager {
 			mCommunication.sendDataSingle(data, info, targetUser);
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
 		}
 	};
 
@@ -496,8 +513,9 @@ public class CommunicationManager {
 		try {
 			return mCommunication.getJoinedHostInfo(mAppID);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return null;
+		} catch (NullPointerException e) {
 			return null;
 		}
 	}
