@@ -2,6 +2,7 @@ package com.dreamlink.communication.lib;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.dreamlink.communication.aidl.Communication;
@@ -15,7 +16,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.DropBoxManager.Entry;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -28,7 +28,7 @@ import android.util.Log;
 public class CommunicationManager {
 	private static final String TAG = "CommunicationManager";
 	private Communication mCommunication;
-	private PlatformCallback platformCallback;
+	private PlatformCallback mPlatformCallback;
 	/** Intent to start communication service */
 	private final String ACTION_COMMUNICATION_SERVICE = "com.dreamlink.communication.ComService";
 	private Context mContext;
@@ -36,6 +36,7 @@ public class CommunicationManager {
 	private OnCommunicationListener mOnCommunicationListener;
 	private int mAppID = -1;
 	private boolean platformRegisted = false;
+
 	private OnCommunicationListenerExternal.Stub mStub = new OnCommunicationListenerExternal.Stub() {
 		@Override
 		public void onUserDisconnected(User user) throws RemoteException {
@@ -68,22 +69,23 @@ public class CommunicationManager {
 		@Override
 		public void startGroupBusiness(HostInfo hostInfo)
 				throws RemoteException {
-			if (platformCallback != null)
-				platformCallback.startGroupBusiness(hostInfo);
+			if (mPlatformCallback != null)
+				mPlatformCallback.startGroupBusiness(hostInfo);
 		}
 
 		@Override
 		public void receiverMessage(byte[] data, User sendUser,
 				boolean allFlag, HostInfo info) throws RemoteException {
-			if (platformCallback != null)
-				platformCallback.receiverMessage(data, sendUser, allFlag, info);
+			if (mPlatformCallback != null)
+				mPlatformCallback
+						.receiverMessage(data, sendUser, allFlag, info);
 		}
 
 		@Override
 		public void joinGroupResult(HostInfo hostInfo, boolean flag)
 				throws RemoteException {
-			if (platformCallback != null)
-				platformCallback.joinGroupResult(hostInfo, flag);
+			if (mPlatformCallback != null)
+				mPlatformCallback.joinGroupResult(hostInfo, flag);
 		}
 
 		@Override
@@ -99,20 +101,20 @@ public class CommunicationManager {
 					tem.add(hostInfo);
 				}
 			}
-			if (hostList != null && platformCallback != null)
-				platformCallback.hostInfoChange(tem);
+			if (hostList != null && mPlatformCallback != null)
+				mPlatformCallback.hostInfoChange(tem);
 		}
 
 		@Override
 		public void hostHasCreated(HostInfo hostInfo) throws RemoteException {
-			if (platformCallback != null)
-				platformCallback.hostHasCreated(hostInfo);
+			if (mPlatformCallback != null)
+				mPlatformCallback.hostHasCreated(hostInfo);
 		}
 
 		@Override
 		public void hasExitGroup(int hostId) throws RemoteException {
-			if (platformCallback != null)
-				platformCallback.hasExitGroup(hostId);
+			if (mPlatformCallback != null)
+				mPlatformCallback.hasExitGroup(hostId);
 		}
 
 		@Override
@@ -121,8 +123,8 @@ public class CommunicationManager {
 			@SuppressWarnings("unchecked")
 			ArrayList<User> userIdList = (ArrayList<User>) ArrayUtil
 					.byteArrayToObject(data);
-			if (userIdList != null && platformCallback != null)
-				platformCallback.groupMemberUpdate(hostId, userIdList);
+			if (userIdList != null && mPlatformCallback != null)
+				mPlatformCallback.groupMemberUpdate(hostId, userIdList);
 		}
 
 	};
@@ -196,6 +198,16 @@ public class CommunicationManager {
 		public void onCommunicationConnected();
 	}
 
+	/** register callback method,please invoke this method only */
+	public void registerPlatformCallback(PlatformCallback platformCallback) {
+		this.mPlatformCallback = platformCallback;
+	}
+	/** register callback method,please invoke this method only */
+	public void registerOnCommunicationListener(
+			OnCommunicationListener onCommunicationListener) {
+		this.mOnCommunicationListener = onCommunicationListener;
+	}
+
 	/**
 	 * Service connection with Communication service.
 	 */
@@ -206,7 +218,7 @@ public class CommunicationManager {
 			if (mOnConnectionChangeListener != null) {
 				mOnConnectionChangeListener.onCommunicationDisconnected();
 			}
-			if (mOnCommunicationListener != null && mAppID != -1) {
+			if (mAppID != -1) {
 				try {
 					mCommunication.unRegistListener(mAppID);
 				} catch (RemoteException e) {
@@ -226,10 +238,10 @@ public class CommunicationManager {
 			if (mOnConnectionChangeListener != null) {
 				mOnConnectionChangeListener.onCommunicationConnected();
 			}
-
-			if (mOnCommunicationListener != null && mAppID != -1) {
+			if (mAppID != -1) {
 				try {
 					mCommunication.registListener(mStub, mAppID);
+					mCommunication.regitserPlatformCallback(platStub, mAppID);
 				} catch (RemoteException e) {
 					Log.e(TAG, "onServiceConnected() registListener error " + e);
 				} catch (NullPointerException e) {
@@ -248,6 +260,7 @@ public class CommunicationManager {
 	 * 
 	 * @param listener
 	 * @return success ? true : false.
+	 * @deprecated
 	 */
 	public boolean connectCommunicatonService(
 			OnConnectionChangeListener connectionChangeListener,
@@ -263,6 +276,17 @@ public class CommunicationManager {
 				Context.BIND_AUTO_CREATE);
 	}
 
+	public boolean connectCommunicatonService(
+			OnConnectionChangeListener connectionChangeListener, int appID) {
+		Log.d(TAG, "connectCommunicatonService appID銆� " + appID);
+		mOnConnectionChangeListener = connectionChangeListener;
+		mAppID = appID;
+		Intent intent = new Intent();
+		intent.setAction(ACTION_COMMUNICATION_SERVICE);
+		return mContext.bindService(intent, mServiceConnection,
+				Context.BIND_AUTO_CREATE);
+	}
+
 	/**
 	 * unregister call back listener. when you don't use the IPC ,please
 	 * unregister call back
@@ -271,6 +295,7 @@ public class CommunicationManager {
 		Log.d(TAG, "disconnectCommunicationService");
 		try {
 			mCommunication.unRegistListener(mAppID);
+			mCommunication.unregitserPlatformCallback(mAppID);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (NullPointerException e) {
@@ -386,11 +411,15 @@ public class CommunicationManager {
 	}
 
 	/* for platform manager- start */
-	/** if want use platform ,please invoke this method first */
+	/**
+	 * if want use platform ,please invoke this method first
+	 * 
+	 * @deprecated
+	 * */
 	public void registerPlatformCallback(PlatformCallback platformCallback,
 			int appId) {
 		if (mCommunication != null && platformCallback != null) {
-			this.platformCallback = platformCallback;
+			this.mPlatformCallback = platformCallback;
 			platformRegisted = true;
 			try {
 				mCommunication.regitserPlatformCallback(platStub, appId);
@@ -401,6 +430,7 @@ public class CommunicationManager {
 		}
 	}
 
+	/** @deprecated */
 	public void unregitserPlatformCallback(int appId) {
 		Log.e("ArbiterLiu", "unregitserPlatformCallback      " + appId);
 		if (platformRegisted && mCommunication != null) {
