@@ -2,15 +2,7 @@ package com.dreamlink.communication.lib;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.dreamlink.communication.aidl.Communication;
-import com.dreamlink.communication.aidl.HostInfo;
-import com.dreamlink.communication.aidl.OnCommunicationListenerExternal;
-import com.dreamlink.communication.aidl.PlatformManagerCallback;
-import com.dreamlink.communication.aidl.User;
-import com.dreamlink.communication.lib.util.ArrayUtil;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,6 +11,13 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.dreamlink.communication.aidl.Communication;
+import com.dreamlink.communication.aidl.HostInfo;
+import com.dreamlink.communication.aidl.OnCommunicationListenerExternal;
+import com.dreamlink.communication.aidl.PlatformManagerCallback;
+import com.dreamlink.communication.aidl.User;
+import com.dreamlink.communication.lib.util.ArrayUtil;
 
 /**
  * This class is used for bind communication service and communicate with it by
@@ -91,12 +90,10 @@ public class CommunicationManager {
 		@Override
 		public void hostInfoChange(byte[] data) throws RemoteException {
 			@SuppressWarnings("unchecked")
-			ConcurrentHashMap<Integer, HostInfo> hostList = (ConcurrentHashMap<Integer, HostInfo>) ArrayUtil
+			List<HostInfo> hostList = (List<HostInfo>) ArrayUtil
 					.byteArrayToObject(data);
 			List<HostInfo> tem = new ArrayList<HostInfo>();
-			for (java.util.Map.Entry<Integer, HostInfo> entry : hostList
-					.entrySet()) {
-				HostInfo hostInfo = entry.getValue();
+			for (HostInfo hostInfo : hostList) {
 				if (hostInfo.app_id == mAppID) {
 					tem.add(hostInfo);
 				}
@@ -198,10 +195,14 @@ public class CommunicationManager {
 		public void onCommunicationConnected();
 	}
 
-	/** register callback method,please invoke this method only */
+	/**
+	 * register callback method,if you want communication please invoke
+	 * it.please invoke this method only
+	 */
 	public void registerPlatformCallback(PlatformCallback platformCallback) {
 		this.mPlatformCallback = platformCallback;
 	}
+
 	/** register callback method,please invoke this method only */
 	public void registerOnCommunicationListener(
 			OnCommunicationListener onCommunicationListener) {

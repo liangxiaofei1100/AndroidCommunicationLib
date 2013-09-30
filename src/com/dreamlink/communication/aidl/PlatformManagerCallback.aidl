@@ -9,7 +9,7 @@ import com.dreamlink.communication.aidl.HostInfo;
 
 		 void groupMemberUpdate(int hostId, in byte[] data);//ArrayList<User> userList
 
-		 void hostInfoChange(in byte[] data);//ConcurrentHashMap<Integer, HostInfo> hostList
+		 void hostInfoChange(in byte[] data);//ArrayList<HostInfo> hostList
 
 		 void hasExitGroup(int hostId);
 
