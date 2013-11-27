@@ -16,30 +16,10 @@ public class User implements Serializable, Parcelable {
 
 	private SystemInfo mSystemInfo;
 
-	transient public final static int ID_NOT_PRE_INSTALL_HEAD = -1;
-	private int mHeadId = 0;
-	transient private boolean mIsLocal = false;
-
 	public User() {
 
 	}
-
-	public void setIsLocal(boolean isLocal) {
-		mIsLocal = isLocal;
-	}
-
-	public boolean isLocal() {
-		return mIsLocal;
-	}
-
-	public int getHeadId() {
-		return mHeadId;
-	}
-
-	public void setHeadId(int id) {
-		mHeadId = id;
-	}
-
+	
 	public int getUserID() {
 		return mUserID;
 	}
